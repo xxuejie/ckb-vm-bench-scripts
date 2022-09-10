@@ -2,6 +2,10 @@
 #include <string.h>
 #include "sha3.h"
 
+#ifdef MEASURE_WITH_CLOCK
+#include <time.h>
+#endif
+
 #define SHA3_BLOCK_SIZE 32
 
 /*
@@ -114,6 +118,10 @@ int main(int argc, char* argv[])
 
   int aggregated_ret = 0;
 
+  #ifdef MEASURE_WITH_CLOCK
+  clock_t t0 = clock();
+  #endif
+
   for (int i = 0; i < SECP_TIMES; i++) {
   len = hex_to_bin(buf, 65, argv[1]);
   CHECK_LEN(len);
@@ -148,6 +156,10 @@ int main(int argc, char* argv[])
   aggregated_ret += ret;
   }
 
+  #ifdef MEASURE_WITH_CLOCK
+  clock_t t1 = clock();
+  printf("Elapsed time in milliseconds: %lf\n", (((double) t1) - ((double) t0)) / CLOCKS_PER_SEC * 1000000);
+  #endif
 
   if (aggregated_ret == SECP_TIMES) {
     ret = 0;
