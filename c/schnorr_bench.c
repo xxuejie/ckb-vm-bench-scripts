@@ -14,6 +14,13 @@
 #define USE_EXTERNAL_DEFAULT_CALLBACKS
 #include <secp256k1.c>
 
+#ifdef USE_CKB_C_STDLIB
+#include "ckb_syscalls.h"
+void abort() {
+  ckb_exit(-1);
+}
+#endif
+
 void secp256k1_default_illegal_callback_fn(const char* str, void* data) {
   (void) str;
   (void) data;
