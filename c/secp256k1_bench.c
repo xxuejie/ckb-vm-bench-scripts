@@ -4,14 +4,9 @@
 
 #define SHA3_BLOCK_SIZE 32
 
-/*
- * We are including secp256k1 implementation directly so gcc can strip
- * unused functions. For some unknown reasons, if we link in libsecp256k1.a
- * directly, the final binary will include all functions rather than those used.
- */
-#define HAVE_CONFIG_H 1
 #define USE_EXTERNAL_DEFAULT_CALLBACKS
 #include <secp256k1.c>
+#include <precomputed_ecmult.c>
 
 #ifdef USE_CKB_C_STDLIB
 #include "ckb_syscalls.h"
@@ -30,21 +25,6 @@ void secp256k1_default_error_callback_fn(const char* str, void* data) {
   (void) str;
   (void) data;
   abort();
-}
-
-int secp256k1_custom_verify_only_initialize(secp256k1_context *context,
-                                            secp256k1_ge_storage (*pre_g)[],
-                                            secp256k1_ge_storage (*pre_g_128)[]) {
-  context->illegal_callback = default_illegal_callback;
-  context->error_callback = default_error_callback;
-
-  secp256k1_ecmult_context_init(&context->ecmult_ctx);
-  secp256k1_ecmult_gen_context_init(&context->ecmult_gen_ctx);
-
-  context->ecmult_ctx.pre_g = pre_g;
-  context->ecmult_ctx.pre_g_128 = pre_g_128;
-
-  return 1;
 }
 
 int char_to_int(char ch)
@@ -110,20 +90,15 @@ int main(int argc, char* argv[])
     return -1;
   }
 
+  /* Verification code actually requires no context */
   secp256k1_context context;
-  int ret = secp256k1_custom_verify_only_initialize(
-      &context,
-      (secp256k1_ge_storage (*)[]) &secp256k1_ecmult_static_pre_context,
-      (secp256k1_ge_storage (*)[]) &secp256k1_ecmult_static_pre128_context);
-  if (ret == 0) {
-    return 4;
-  }
+  memset(&context, 0, sizeof(secp256k1_context));
 
   len = hex_to_bin(buf, 65, argv[1]);
   CHECK_LEN(len);
   secp256k1_pubkey pubkey;
 
-  ret = secp256k1_ec_pubkey_parse(&context, &pubkey, buf, len);
+  int ret = secp256k1_ec_pubkey_parse(&context, &pubkey, buf, len);
   if (ret == 0) {
     return 1;
   }
