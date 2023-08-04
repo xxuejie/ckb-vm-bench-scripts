@@ -11,11 +11,19 @@
 #include <secp256k1.c>
 #include <precomputed_ecmult.c>
 
+#ifdef NO_CODE_PURGING
+#include <precomputed_ecmult_gen.c>
+#endif
+
 #ifdef USE_CKB_C_STDLIB
 #include "ckb_syscalls.h"
 void abort() {
   ckb_exit(-1);
 }
+#endif
+
+#ifdef USE_EXTERNAL_ABORT
+extern void abort();
 #endif
 
 void secp256k1_default_illegal_callback_fn(const char* str, void* data) {
