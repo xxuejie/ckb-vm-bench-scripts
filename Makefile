@@ -4,7 +4,7 @@ HOST := riscv64-elf
 CFLAGS := -Ideps/secp256k1/src -Ideps/secp256k1 -O3
 LDFLAGS := -Wl,-static -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,-s
 SECP256K1_BENCH_BIN := build/secp256k1_bench
-SCHNORR_BENCH_BIN := build/schnorr_bench_clang
+SCHNORR_BENCH_BIN := build/schnorr_bench
 
 # docker pull nervos/ckb-riscv-gnu-toolchain:jammy-20230214
 BUILDER_DOCKER := nervos/ckb-riscv-gnu-toolchain@sha256:980b93b3ecb4e7c825d3d50f3ec9a3817fc3dbf952c14694b6cb91623602ae9e
